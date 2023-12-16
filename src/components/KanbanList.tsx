@@ -23,21 +23,20 @@ interface KanbanListProps {
 export function KanbanList(kanbanListProps: KanbanListProps) {
 
     return (
-        <Card variant="outlined" sx={{bgcolor: 'grey.200', width: 400}}>
-            <CardContent>
-                <Droppable droppableId={kanbanListProps.list.id}>
-                    {(provided)=>(
-                        <Stack spacing={2} ref={provided.innerRef} {...provided.droppableProps}>
+        <Droppable droppableId={kanbanListProps.list.id}>
+            {(provided)=>(
+                <Card variant="outlined" sx={{bgcolor: 'grey.200', width: 400}}  ref={provided.innerRef} {...provided.droppableProps}>
+                    <CardContent>
+                        <Stack spacing={2}>
                             {kanbanListProps.entries.map((entry, index) => (
                                 <KanbanItem key={entry.id} entry={entry} index={index}/>
                             ))}
                             {provided.placeholder}
                         </Stack>
-                    )}
-                    
-                </Droppable>
-            </CardContent>
-        </Card>
+                    </CardContent>
+                </Card>
+            )}
+        </Droppable>
     );
 }
 
