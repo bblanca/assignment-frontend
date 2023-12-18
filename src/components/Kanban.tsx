@@ -1,153 +1,82 @@
-import {Box, Button, Card, CardContent, Checkbox, Stack, Typography} from "@mui/material";
+import { Box, Stack } from '@mui/material';
+import { v4 as uuidv4 } from 'uuid';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
-import { BaseSyntheticEvent, SyntheticEvent, useState } from "react";
-import KanbanList from "./KanbanList";
-import initialData from "../initial-data";
-import { constants } from "crypto";
-import { SyntheticEventData } from "react-dom/test-utils";
-import { Satellite } from "@mui/icons-material";
-
-
+import { useReducer, useEffect, useState } from 'react';
+import { KanbanList } from './KanbanList';
+import { initialData } from '../initial-data';
+import { STATE_ACTION_TYPE, stateReducer } from '../reducers/kanban.reducer';
+import { StateContext, StateDispatchContext } from '../contexts/kanban.context';
 
 export function Kanban() {
-    const [state, setState] = useState(initialData);   //Fixme?? one useState for all data? useReducer? 
-  
-    
-    
-    
-    const onDragEnd = (result: DropResult) => {
-        const {destination, source, draggableId} = result;
+  const [initDatafinished, setInitDatafinished] = useState(false);
+  const [state, dispatch] = useReducer(stateReducer, initialData);
 
-        if(!destination ||
-           destination.droppableId === source.droppableId &&
-           destination.index === source.index){
-            return;
-        }
+  useEffect(() => {
+    initialData.lists.map((list) => {
+      list.items.map((item) => {
+        item.id = uuidv4();
+      });
+    });
 
-        if(destination.droppableId === source.droppableId ){
-            const newList = state.lists[source.droppableId as keyof typeof state.lists];
-            const newItemIds = Array.from(newList.itemIds);
-            newItemIds.splice(source.index, 1);
-            newItemIds.splice(destination.index, 0, draggableId);
-    
-            
-            const newState = {
-            ...state,
-            lists: {
-                ...state.lists,
-                [newList.id]: newList,
-            },
-            };
-    
-            setState(newState);  
-        }
-        else{
-            const sourceList = state.lists[source.droppableId as keyof typeof state.lists];
-            const newSourceItemIds = Array.from(sourceList.itemIds);
-            newSourceItemIds.splice(source.index, 1);
-    
-            const newSourceList = {
-            ...sourceList,
-            itemIds: newSourceItemIds,
-            };
-    
-            const destinationList = state.lists[destination.droppableId as keyof typeof state.lists];
-            const newDestinationItemIds = Array.from(destinationList.itemIds);
-            newDestinationItemIds.splice(destination.index, 0, draggableId);
-    
-            const newDestinationList = {
-            ...destinationList,
-            itemIds: newDestinationItemIds,
-            };
+    dispatch({ type: STATE_ACTION_TYPE.SET_STATE, payload: { newState: initialData } });
+    setInitDatafinished(true);
 
+  }, []);
 
-            const newState = {
-            ...state,
-            lists: {
-                ...state.lists,
-                [newSourceList.id]: newSourceList,
-                [newDestinationList.id]: newDestinationList,
-            },
-            };
-    
-            setState(newState);  
-        }
-        
+  const onDragEnd = ({ destination, source, draggableId }: DropResult) => {
 
-    };
+    if (!destination ||
+      (destination.droppableId === source.droppableId && destination.index === source.index))
+      return
 
-    const handleItemNaming = (id: string, text: string) => {
-        const newItems = {
-            ...state.items,
-            [id]: {
-                id: id,
-                content: text
-            }
-        };
+    if (destination.droppableId === source.droppableId) {
+      const listIndex = state.lists.findIndex((element) => element.id === source.droppableId);
+      if (listIndex === -1) throw new Error();
 
-        const newState = {
-            ...state,
-            items: newItems,
-        }
-        setState(newState);
+      const newItems = Array.from(state.lists[listIndex].items);
+      const removedElement = newItems.splice(source.index, 1);
+      newItems.splice(destination.index, 0, removedElement[0]);
+
+      dispatch({ type: STATE_ACTION_TYPE.SET_LIST_ITEMS, payload: { newListItems: newItems, listIndex: listIndex } });
+
     }
+    else {
+      /*remove dragged item from source list*/
+      const sourceListIndex = state.lists.findIndex((element) => element.id === source.droppableId);
+      if (sourceListIndex === -1) throw new Error();
 
-    const addItem = (e: BaseSyntheticEvent) => {
-         //create item and add to list
+      const newSourceItems = Array.from(state.lists[sourceListIndex].items);
+      const removedElement = newSourceItems.splice(source.index, 1);
 
-        //props.list.itemIds.push('task-' + (props.itemIdCounter++).toString()); //fixme: why not like this? update State? 
-        const listId = e.target.value as keyof typeof state.lists;
-        const newItemIdCounter = state.itemIdCounter + 1; //fixme: necessary since it countains value and not a refernece
-        const newItemId = 'task-' + newItemIdCounter.toString();
+      dispatch({ type: STATE_ACTION_TYPE.SET_LIST_ITEMS, payload: { newListItems: newSourceItems, listIndex: sourceListIndex } });
 
-        const newItemIds = Array.from(state.lists[listId].itemIds);
-        newItemIds.push(newItemId);
+      /*insert dragged item to destination list*/
+      const destinationListIndex = state.lists.findIndex((element) => element.id === destination.droppableId);
+      if (destinationListIndex === -1) throw new Error();
 
-        const newList = {
-            ...state.lists[listId],
-            itemIds: newItemIds
-        }
+      const newDestinationItems = Array.from(state.lists[destinationListIndex].items);
+      newDestinationItems.splice(destination.index, 0, removedElement[0]);
 
-        const newItem = {
-            id: newItemId,
-            content: ''
-        }
-
-        const newItems = {
-            ...state.items,
-            [newItemId]: newItem,
-        };
-
-        const newState = {
-            ...state,
-            lists: {
-                ...state.lists,
-                [newList.id]: newList,
-            },
-            items: newItems,
-            itemIdCounter: newItemIdCounter
-        }
-    
-
-        setState(newState);
+      dispatch({ type: STATE_ACTION_TYPE.SET_LIST_ITEMS, payload: { newListItems: newDestinationItems, listIndex: destinationListIndex } });
     }
+  };
 
-    
-    return (
-        <DragDropContext onDragEnd={onDragEnd} >
-            <Box sx={{paddingBottom: 4}}>
-                <Stack spacing={2} margin={5} direction="row" alignItems="flex-start">{
-                        state.listOrder.map((listID) => {
-                            const list = state.lists[listID  as keyof typeof state.lists];
-                            const items = list.itemIds.map(itemId => state.items[itemId as keyof typeof state.items])
-                            return (<KanbanList key={list.id} list={list} items={items} itemIdCounter={state.itemIdCounter} addItem={addItem} handleItemNaming={handleItemNaming}/>)
-                        }
-                        )
-                    }
-                </Stack>
-            </Box>
-        </DragDropContext>
-    );
+
+  return (
+    <StateContext.Provider value={state}>
+      <StateDispatchContext.Provider value={dispatch}>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Box sx={{ paddingBottom: 4 }}>
+        <Stack spacing={2} margin={5} direction="row" alignItems="flex-start">{ //'flex-start' enables individually adjusted heights of KanbanLists
+          initDatafinished && state.lists.map((list) => (
+            <KanbanList key={list.id} listId={list.id} />) 
+          )
+        }
+        </Stack>
+      </Box>
+    </DragDropContext>
+      </StateDispatchContext.Provider>
+    </StateContext.Provider>
+  );
 }
 
-export default Kanban;

@@ -72,8 +72,3 @@ You can learn more in the [Create React App documentation](https://facebook.gith
 To learn React, check out the [React documentation](https://reactjs.org/).
 
 
-# Documentation
-
-Time reading documentation & watching tutorials before starting assignment: 3,5h
-
-Time reading documentation & watching tutorials of react-beautiful-dnd: 18:10-
