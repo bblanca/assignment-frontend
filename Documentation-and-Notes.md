@@ -15,6 +15,8 @@ Time restructuring, adding reducers, contexts and using a different data structu
 ## Further Improvements
  - In my opinion, it would be prettier if the grey list boxes are resized (become smaller) during the DND process, and not only after the item is dropped.
 
+ - When an item is moved to an empty list, the placement is odd at first.
+
  - The case where an item is added but not immediately named should be handled: I would suggest deleting the item, because if the user does not want to name the item, he probably added it by mistake.
 
  - For more complex projects, a state management library should be used.
