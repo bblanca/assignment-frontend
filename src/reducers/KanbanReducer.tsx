@@ -1,12 +1,12 @@
-import { KanbanBoard, KanbanItem, KanbanList } from '../data/KanbanDefinitions'
+import { IKanbanBoard, IKanbanItem, IKanbanList } from '../data/KanbanDefinitions'
 import { StateAction } from '../actions/KanbanActions'
 
-export const stateReducer = (state: KanbanBoard, action: StateAction): KanbanBoard => {
+export const stateReducer = (state: IKanbanBoard, action: StateAction): IKanbanBoard => {
   switch (action.type) {
     case 'moveItem': {
       const { list, itemIndex, listIndex } = getItemInfo(action.payload.itemId, state.lists)
       const destinationListIndex = state.lists.findIndex(list => list.id === action.payload.destinationListId)
-      if (listIndex === -1) throw new Error()
+      if (listIndex === -1) throw new Error('List was not found')
 
       const destinationList = state.lists[destinationListIndex]
       const newItems = Array.from(list.items)
@@ -36,7 +36,7 @@ export const stateReducer = (state: KanbanBoard, action: StateAction): KanbanBoa
       }
 
       const listIndex = state.lists.findIndex(list => list.id === action.payload.listId)
-      if (listIndex === -1) throw new Error()
+      if (listIndex === -1) throw new Error('List was not found')
 
       const newListItems = Array.from(state.lists[listIndex].items)
       newListItems.push(item)
@@ -63,12 +63,12 @@ export const stateReducer = (state: KanbanBoard, action: StateAction): KanbanBoa
 }
 
 interface ItemInfo {
-  item: KanbanItem
-  list: KanbanList
+  item: IKanbanItem
+  list: IKanbanList
   itemIndex: number
   listIndex: number
 }
-const getItemInfo = (itemId: string, lists: KanbanList[]): ItemInfo => {
+const getItemInfo = (itemId: string, lists: IKanbanList[]): ItemInfo => {
   //efficiency could be improved (lookup table)
   for (let listIndex = 0; listIndex < lists.length; listIndex++) {
     let list = lists[listIndex]
@@ -82,13 +82,13 @@ const getItemInfo = (itemId: string, lists: KanbanList[]): ItemInfo => {
   throw new Error('Item was not found')
 }
 
-const replaceListItems = (state: KanbanBoard, listIndex: number, newItems: KanbanItem[]): KanbanBoard => {
+const replaceListItems = (state: IKanbanBoard, listIndex: number, newItems: IKanbanItem[]): IKanbanBoard => {
   const newList = {
     ...state.lists[listIndex],
     items: newItems,
   }
 
-  const newState: KanbanBoard = {
+  const newState: IKanbanBoard = {
     lists: Array.from(state.lists),
   }
   newState.lists[listIndex] = newList

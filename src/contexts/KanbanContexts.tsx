@@ -1,8 +1,8 @@
 import React, { createContext, useContext } from 'react'
-import { KanbanBoard } from '../data/KanbanDefinitions'
+import { IKanbanBoard } from '../data/KanbanDefinitions'
 import { StateAction } from '../actions/KanbanActions'
 
-export const StateContext = createContext<KanbanBoard | null>(null)
+export const StateContext = createContext<IKanbanBoard | null>(null)
 export const StateDispatchContext = createContext<React.Dispatch<StateAction> | null>(null)
 
 export const useStateContext = () => {

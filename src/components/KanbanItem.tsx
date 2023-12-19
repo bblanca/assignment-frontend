@@ -1,11 +1,11 @@
 import { Draggable } from 'react-beautiful-dnd'
 import { Card, CardContent, Checkbox, Stack, TextField, Typography } from '@mui/material'
 import { useStateDispatchContext } from '../contexts/KanbanContexts'
-import { KanbanItem } from '../data/KanbanDefinitions'
+import { IKanbanItem } from '../data/KanbanDefinitions'
 import React from 'react'
 
 interface KanbanItemProps {
-  item: KanbanItem
+  item: IKanbanItem
   itemIndex: number
 }
 

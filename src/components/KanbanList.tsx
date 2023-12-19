@@ -2,12 +2,12 @@ import { Droppable } from 'react-beautiful-dnd'
 import { Button, Card, CardContent, Stack } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import { useStateDispatchContext } from '../contexts/KanbanContexts'
-import { KanbanList } from '../data/KanbanDefinitions'
+import { IKanbanList } from '../data/KanbanDefinitions'
 import { KanbanItem } from './KanbanItem'
 import { v4 as uuidv4 } from 'uuid'
 
 interface KanbanListProps {
-  list: KanbanList
+  list: IKanbanList
 }
 
 export function KanbanList({ list }: KanbanListProps) {

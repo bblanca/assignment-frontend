@@ -1,7 +1,7 @@
-import { KanbanBoard } from './KanbanDefinitions'
+import { IKanbanBoard } from './KanbanDefinitions'
 import { v4 as uuidv4 } from 'uuid'
 
-export const initialData: KanbanBoard = {
+export const initialData: IKanbanBoard = {
   lists: [
     {
       id: 'L-A',
