@@ -46,5 +46,19 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "prettier": "3.1.1"
+  },
+  "prettier": {
+    "trailingComma": "all",
+    "bracketSpacint": false,
+    "bracketSameLine": true,
+    "arrowParens": "avoid",
+    "singleAttributePerLine": false,
+    "printWidth": 120,
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true
   }
 }

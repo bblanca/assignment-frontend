@@ -20,8 +20,7 @@ Time restructuring, adding reducer, context and using a different data structure
  - if a item is added but it is not named: what should happen? (I would suggest deleting item since creating was probably a mistake )
  - for bigger projects: state management tools?
  - no complex error handling was implemented -> I simply throw an error
- - naming: given naming for kanban was 'list' and 'item' --> however, they are mostly called 'column' and 'card'
- - naming: kanban.context.ts ?
+ - naming: given naming for kanban was 'list' and 'item' --> however, they are mostly called 'column' and 'card', Board?
  
 
 

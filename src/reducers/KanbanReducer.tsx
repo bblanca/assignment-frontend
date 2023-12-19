@@ -1,69 +1,97 @@
-import { IKanbanBoard } from '../data/KanbanDefinitions';
-import { StateAction, StateActionType} from '../actions/KanbanActions';
-import { v4 as uuidv4 } from 'uuid';
-import { getItemInfo, updateListItems } from '../helpers/KanbanHelpers';
+import { KanbanBoard, KanbanItem, KanbanList } from '../data/KanbanDefinitions'
+import { StateAction } from '../actions/KanbanActions'
 
-
-export const stateReducer = (state: IKanbanBoard, action: StateAction): IKanbanBoard => {
-  
+export const stateReducer = (state: KanbanBoard, action: StateAction): KanbanBoard => {
   switch (action.type) {
-    case StateActionType.moveItem:
+    case 'moveItem': {
+      const { list, itemIndex, listIndex } = getItemInfo(action.payload.itemId, state.lists)
+      const destinationListIndex = state.lists.findIndex(list => list.id === action.payload.destinationListId)
+      if (listIndex === -1) throw new Error()
 
-      var {item, list, itemIndex, listIndex} = getItemInfo(action.payload.itemId, state.lists);
-      const destinationListIndex = state.lists.findIndex(list => list.id === action.payload.destinationListId); 
-      if(listIndex === -1) throw new Error();
-
-      const destinationList = state.lists[destinationListIndex];
-      const newItems = Array.from(list.items);
-      const removedElement = newItems.splice(itemIndex, 1);
-
+      const destinationList = state.lists[destinationListIndex]
+      const newItems = Array.from(list.items)
+      const [removedItem] = newItems.splice(itemIndex, 1)
 
       if (list.id === destinationList.id) {
         /*update state with added item to list at new position*/
-        newItems.splice(action.payload.destinationIndexWithinList, 0, removedElement[0]);
-        return updateListItems(state, listIndex, newItems);
-
-      }else{
+        newItems.splice(action.payload.destinationIndexWithinList, 0, removedItem)
+        return replaceListItems(state, listIndex, newItems)
+      } else {
         /*update state with removed item from source list*/
-        const StateWithUpdatedSourceList = updateListItems(state, listIndex, newItems);
+        const stateWithUpdatedSourceList = replaceListItems(state, listIndex, newItems)
 
         /*update state with added item to destination list*/
-        const newDestinationItems = Array.from(state.lists[destinationListIndex].items);
-        newDestinationItems.splice(action.payload.destinationIndexWithinList, 0, removedElement[0]);
+        const newDestinationItems = Array.from(state.lists[destinationListIndex].items)
+        newDestinationItems.splice(action.payload.destinationIndexWithinList, 0, removedItem)
 
-        return updateListItems(StateWithUpdatedSourceList, destinationListIndex, newDestinationItems)
+        return replaceListItems(stateWithUpdatedSourceList, destinationListIndex, newDestinationItems)
       }
-      break;
+      break
+    }
 
-    case StateActionType.addItemToList:
-      
-      item = {
-        id: uuidv4(),
+    case 'addEmptyItemToList': {
+      const item = {
+        id: action.payload.itemId,
         content: '',
-      };
+      }
 
-      listIndex = state.lists.findIndex(list => list.id === action.payload.listId)
-      if (listIndex === -1) throw new Error();
+      const listIndex = state.lists.findIndex(list => list.id === action.payload.listId)
+      if (listIndex === -1) throw new Error()
 
-      var newListItems = Array.from(state.lists[listIndex].items);
+      const newListItems = Array.from(state.lists[listIndex].items)
       newListItems.push(item)
 
-      return updateListItems(state, listIndex, newListItems);
+      return replaceListItems(state, listIndex, newListItems)
+    }
 
-    case StateActionType.updateItemText:
-      
-      var {item, list, itemIndex, listIndex} = getItemInfo(action.payload.itemId, state.lists);
-    
+    case 'updateItemText': {
+      const { item, itemIndex, listIndex } = getItemInfo(action.payload.itemId, state.lists)
+
       const newItem = {
-        ...item, 
-        content: action.payload.itemText
+        ...item,
+        content: action.payload.itemText,
       }
-      var newListItems = Array.from(state.lists[listIndex].items);
-      newListItems[itemIndex] = newItem;
+      const newListItems = Array.from(state.lists[listIndex].items)
+      newListItems[itemIndex] = newItem
 
-      return updateListItems(state, listIndex, newListItems);
+      return replaceListItems(state, listIndex, newListItems)
+    }
 
     default:
-      throw new Error();
+      throw new Error(`Action type: ${(action as any).type} does not exist`)
   }
-};
+}
+
+interface ItemInfo {
+  item: KanbanItem
+  list: KanbanList
+  itemIndex: number
+  listIndex: number
+}
+const getItemInfo = (itemId: string, lists: KanbanList[]): ItemInfo => {
+  //efficiency could be improved (lookup table)
+  for (let listIndex = 0; listIndex < lists.length; listIndex++) {
+    let list = lists[listIndex]
+    for (let itemIndex = 0; itemIndex < list.items.length; itemIndex++) {
+      let item = list.items[itemIndex]
+      if (item.id === itemId) {
+        return { item, list, itemIndex, listIndex }
+      }
+    }
+  }
+  throw new Error('Item was not found')
+}
+
+const replaceListItems = (state: KanbanBoard, listIndex: number, newItems: KanbanItem[]): KanbanBoard => {
+  const newList = {
+    ...state.lists[listIndex],
+    items: newItems,
+  }
+
+  const newState: KanbanBoard = {
+    lists: Array.from(state.lists),
+  }
+  newState.lists[listIndex] = newList
+
+  return newState
+}

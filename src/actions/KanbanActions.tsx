@@ -1,14 +1,5 @@
-
-
-
-export const enum StateActionType {
-  moveItem,   
-  addItemToList,      
-  updateItemText,    
-}
-
 interface MoveItemAction {
-  type: StateActionType.moveItem
+  type: 'moveItem'
   payload: {
     itemId: string
     destinationListId: string
@@ -16,19 +7,20 @@ interface MoveItemAction {
   }
 }
 
-interface AddItemToList {
-  type: StateActionType.addItemToList
+interface AddEmptyItemToList {
+  type: 'addEmptyItemToList'
   payload: {
     listId: string
+    itemId: string
   }
 }
 
 interface UpdateItemText {
-  type: StateActionType.updateItemText
+  type: 'updateItemText'
   payload: {
     itemId: string
     itemText: string
   }
 }
 
-export type StateAction = MoveItemAction | AddItemToList | UpdateItemText ;
+export type StateAction = MoveItemAction | AddEmptyItemToList | UpdateItemText

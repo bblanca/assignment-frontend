@@ -1,18 +1,14 @@
-
-export interface IKanbanBoard {
-  lists: IKanbanList[]
+export interface KanbanBoard {
+  lists: KanbanList[]
 }
 
-
-export interface IKanbanList {
+export interface KanbanList {
   id: string
   title: string
-  items: IKanbanItem[]
+  items: KanbanItem[]
 }
 
-export interface IKanbanItem {
+export interface KanbanItem {
   id: string
   content: string
 }
-
-
