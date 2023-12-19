@@ -1,42 +1,33 @@
-import { Card, CardContent, Checkbox, Stack, TextField, Typography } from '@mui/material';
 import { Draggable } from 'react-beautiful-dnd';
-import { IKanbanItem } from '../initial-data';
-import { STATE_ACTION_TYPE, stateAction } from '../reducers/kanban.reducer';
-import { useStateContext, useStateDispatchContext } from '../contexts/kanban.context';
+import { Card, CardContent, Checkbox, Stack, TextField, Typography } from '@mui/material';
+import { StateActionType } from '../actions/KanbanActions';
+import { useStateDispatchContext } from '../contexts/KanbanContexts';
+import { IKanbanItem } from '../data/KanbanDefinitions';
+import { SyntheticEvent } from 'react';
+
 interface KanbanItemProps {
-  listId: string; 
-  itemId: string;
+  item: IKanbanItem,
+  itemIndex: number; 
 }
 
-export function KanbanItem({listId, itemId}: KanbanItemProps) {
+export function KanbanItem({item, itemIndex}: KanbanItemProps) {
 
-  const state = useStateContext();
   const dispatch = useStateDispatchContext();
+ 
+  const handleOnBlur = (e: React.FocusEvent<HTMLInputElement>) => { //fixme ???
+    if(e === undefined)  throw new Error(); //necessary ??
 
-  const listIndex = state.lists.findIndex((list) => list.id === listId) ;
-  const item = state.lists[listIndex].items.find((item) => item.id === itemId);
-  const itemIndex = state.lists[listIndex].items.findIndex((item) => item.id === itemId);
-  if (item === undefined || listIndex === -1 || itemIndex === -1)
-    throw new Error();
-
-  const handleOnBlur = (e: any) => {
-
-    const newItem: IKanbanItem = {
-      id: itemId,
-      content: e?.target.value
-    }
-    dispatch({ type: STATE_ACTION_TYPE.SET_ITEM, payload: { newItem: newItem, listIndex: listIndex, itemIndex: itemIndex } });
+    if(e.target.value !=='')
+      dispatch({ type: StateActionType.updateItemText, payload: { itemId: item.id, itemText: e.target.value } });
   };
 
-  const handleKeyPress = (e: any) => {
-    if (e.keyCode == 13) {
-      const newItem: IKanbanItem = { 
-        id: itemId,
-        content: e?.target.value
-      }
-      dispatch({ type: STATE_ACTION_TYPE.SET_ITEM, payload: { newItem: newItem, listIndex: listIndex, itemIndex: itemIndex } });
-    }
-  };  
+  const handleOnKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => { 
+    if(e === undefined ) throw new Error();
+
+    if((e.target as HTMLInputElement).value !=='')
+      dispatch({ type: StateActionType.updateItemText, payload: { itemId: item.id, itemText: (e.target as HTMLInputElement).value } });
+  };
+
 
   return (
     <Draggable draggableId={item.id} index={itemIndex}>
@@ -46,7 +37,8 @@ export function KanbanItem({listId, itemId}: KanbanItemProps) {
             <Stack spacing={2} direction="row" alignItems="center">
               <Checkbox />
               {item.content === '' ? (
-                <TextField id="standard-basic" label="New Item" variant="standard" autoFocus={true} onKeyDown={handleKeyPress} onBlur={handleOnBlur} />) : (
+                <TextField label="New Item" variant="standard" autoFocus={true} onKeyDown={handleOnKeyDown} onBlur={handleOnBlur} />
+                ) : (
                 <Typography variant="h6">{item.content}</Typography>
               )}
             </Stack>

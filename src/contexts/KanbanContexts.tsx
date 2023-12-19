@@ -1,10 +1,10 @@
 import { createContext, useContext } from 'react';
-import { IKanban, initialData } from '../initial-data';
-import { stateAction } from '../reducers/kanban.reducer';
+import { IKanbanBoard } from '../data/KanbanDefinitions';
+import { StateAction } from '../actions/KanbanActions';
 
 
-export const StateContext = createContext<IKanban | null>(null);
-export const StateDispatchContext = createContext<React.Dispatch<stateAction> | null>(null);
+export const StateContext = createContext<IKanbanBoard | null>(null);
+export const StateDispatchContext = createContext<React.Dispatch<StateAction> | null>(null);
 
 
 export const useStateContext = () => {

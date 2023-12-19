@@ -1,10 +1,12 @@
 # Documentation & Notes
 
-still todo: prettier, consistent naming,  unused stuff, serializable
+still todo: prettier, 
+consistent naming: I before Interfaces  yes or no?
+unused stuff, 
+serializable
 
 
 ## Time Usage
-
 Time reading documentation & watching tutorials before starting assignment: 3,5h
 
 Time reading documentation & watching tutorials of react-beautiful-dnd and implementing a working solution : 1,5h
@@ -19,6 +21,7 @@ Time restructuring, adding reducer, context and using a different data structure
  - for bigger projects: state management tools?
  - no complex error handling was implemented -> I simply throw an error
  - naming: given naming for kanban was 'list' and 'item' --> however, they are mostly called 'column' and 'card'
+ - naming: kanban.context.ts ?
  
 
 
