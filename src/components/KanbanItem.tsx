@@ -24,7 +24,7 @@ export function KanbanItem({ item, itemIndex }: KanbanItemProps) {
   }
 
   const handleOnKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if ((e.target as HTMLInputElement).value !== '')
+    if ((e.target as HTMLInputElement).value !== '' && e.keyCode === 13 )
       dispatch({
         type: 'updateItemText',
         payload: {
