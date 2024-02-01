@@ -1,13 +1,13 @@
 import { Box, Stack } from '@mui/material'
 import { DragDropContext, DropResult } from 'react-beautiful-dnd'
-import { useReducer } from 'react'
+import { useImmerReducer } from "use-immer";
 import { KanbanList } from './KanbanList'
 import { stateReducer } from '../reducers/KanbanReducer'
 import { StateDispatchContext } from '../contexts/KanbanContexts'
 import { initialData } from '../data/InitialData'
 
 export function Kanban() {
-  const [state, dispatch] = useReducer(stateReducer, initialData)
+  const [state, dispatch] = useImmerReducer(stateReducer, initialData)
 
   const onDragEnd = ({ destination, source, draggableId }: DropResult) => {
     if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) return

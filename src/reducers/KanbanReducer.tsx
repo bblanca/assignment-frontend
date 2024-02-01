@@ -1,32 +1,18 @@
-import { IKanbanBoard, IKanbanItem, IKanbanList } from '../data/KanbanDefinitions'
+import { IKanbanBoard,  IKanbanList } from '../data/KanbanDefinitions'
 import { StateAction } from '../actions/KanbanActions'
 
-export const stateReducer = (state: IKanbanBoard, action: StateAction): IKanbanBoard => {
+
+export const stateReducer = (draft: IKanbanBoard, action: StateAction)  => {
   switch (action.type) {
     case 'moveItem': {
-      const { list, itemIndex, listIndex } = getItemInfo(action.payload.itemId, state.lists)
-      const destinationListIndex = state.lists.findIndex(list => list.id === action.payload.destinationListId)
-      if (listIndex === -1) throw new Error('List was not found')
+      const { itemIndex, listIndex } = getItemInfo(action.payload.itemId, draft.lists)
+      const [removedItem] = draft.lists[listIndex].items.splice(itemIndex, 1)
 
-      const destinationList = state.lists[destinationListIndex]
-      const newItems = Array.from(list.items)
-      const [removedItem] = newItems.splice(itemIndex, 1)
+      const destinationList = draft.lists.find(list => list.id === action.payload.destinationListId)
+      if (!destinationList) throw new Error('List was not found')
+      destinationList.items.splice(action.payload.destinationIndexWithinList, 0, removedItem)
 
-      if (list.id === destinationList.id) {
-        /*update state with added item to list at new position*/
-        newItems.splice(action.payload.destinationIndexWithinList, 0, removedItem)
-        return replaceListItems(state, listIndex, newItems)
-      } else {
-        /*update state with removed item from source list*/
-        const stateWithUpdatedSourceList = replaceListItems(state, listIndex, newItems)
-
-        /*update state with added item to destination list*/
-        const newDestinationItems = Array.from(state.lists[destinationListIndex].items)
-        newDestinationItems.splice(action.payload.destinationIndexWithinList, 0, removedItem)
-
-        return replaceListItems(stateWithUpdatedSourceList, destinationListIndex, newDestinationItems)
-      }
-      break
+      return
     }
 
     case 'addEmptyItemToList': {
@@ -35,26 +21,17 @@ export const stateReducer = (state: IKanbanBoard, action: StateAction): IKanbanB
         content: '',
       }
 
-      const listIndex = state.lists.findIndex(list => list.id === action.payload.listId)
-      if (listIndex === -1) throw new Error('List was not found')
+      const list = draft.lists.find(list => list.id === action.payload.listId)
+      if (!list) throw new Error('List was not found')
+      list.items.push(item);
 
-      const newListItems = Array.from(state.lists[listIndex].items)
-      newListItems.push(item)
-
-      return replaceListItems(state, listIndex, newListItems)
+      return
     }
 
     case 'updateItemText': {
-      const { item, itemIndex, listIndex } = getItemInfo(action.payload.itemId, state.lists)
-
-      const newItem = {
-        ...item,
-        content: action.payload.itemText,
-      }
-      const newListItems = Array.from(state.lists[listIndex].items)
-      newListItems[itemIndex] = newItem
-
-      return replaceListItems(state, listIndex, newListItems)
+      const { itemIndex, listIndex } = getItemInfo(action.payload.itemId, draft.lists)
+      draft.lists[listIndex].items[itemIndex].content = action.payload.itemText
+      return
     }
 
     default:
@@ -63,8 +40,6 @@ export const stateReducer = (state: IKanbanBoard, action: StateAction): IKanbanB
 }
 
 interface ItemInfo {
-  item: IKanbanItem
-  list: IKanbanList
   itemIndex: number
   listIndex: number
 }
@@ -75,23 +50,9 @@ const getItemInfo = (itemId: string, lists: IKanbanList[]): ItemInfo => {
     for (let itemIndex = 0; itemIndex < list.items.length; itemIndex++) {
       let item = list.items[itemIndex]
       if (item.id === itemId) {
-        return { item, list, itemIndex, listIndex }
+        return { itemIndex, listIndex }
       }
     }
   }
   throw new Error('Item was not found')
-}
-
-const replaceListItems = (state: IKanbanBoard, listIndex: number, newItems: IKanbanItem[]): IKanbanBoard => {
-  const newList = {
-    ...state.lists[listIndex],
-    items: newItems,
-  }
-
-  const newState: IKanbanBoard = {
-    lists: Array.from(state.lists),
-  }
-  newState.lists[listIndex] = newList
-
-  return newState
 }

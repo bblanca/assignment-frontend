@@ -1,4 +1,4 @@
-interface MoveItemAction {
+interface MoveItem {
   type: 'moveItem'
   payload: {
     itemId: string
@@ -23,4 +23,4 @@ interface UpdateItemText {
   }
 }
 
-export type StateAction = MoveItemAction | AddEmptyItemToList | UpdateItemText
+export type StateAction = MoveItem | AddEmptyItemToList | UpdateItemText
